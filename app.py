@@ -4,9 +4,9 @@ import cv2
 from ultralytics import YOLO
 
 # ===== НАСТРОЙКИ =====
-TOKEN = "8539774382:AAEYoH0n_-GRNXW9xW5ZoGgGmsmBLnGR0hM"
+TOKEN = "ur token"
 
-MODEL_PATH = r"C:\Users\angel\PycharmProjects\SchoolProject\runs\detect\train\weights\best.pt"
+MODEL_PATH = r"ur path"
 
 CLASSES = {
     0: "Деловой стиль (formal)",
@@ -107,3 +107,4 @@ def handle_photo(message):
 
 print("🤖 Бот запущен")
 bot.polling(none_stop=True)
+
