@@ -8,7 +8,7 @@ import os
 
 
 class YOLODetector:
-    def __init__(self, model_path='runs/detect/train/weights/best.pt', conf_threshold=0.25, iou_threshold=0.45):
+    def __init__(self, model_path='ur path', conf_threshold=0.25, iou_threshold=0.45):
         """
         Инициализация детектора YOLO
 
@@ -297,7 +297,7 @@ def find_trained_model():
         'runs/detect/train/weights/best.pt',
         'runs/detect/train2/weights/best.pt',
         'runs/detect/train3/weights/best.pt',
-        r'C:\Users\angel\PycharmProjects\SchoolProject\correct_training\run1\weights\best.pt',
+        r'ur patht',
     ]
 
     for path in search_paths:
@@ -387,5 +387,6 @@ def main():
 if __name__ == "__main__":
 
     from datetime import datetime
+
 
     main()
