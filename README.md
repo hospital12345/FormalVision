@@ -14,7 +14,7 @@ A **training dataset (adapted for YOLO) is also available for purchase.**
 
 **Price: $2.**
 
-Contents: 200 images with formal attire and 200 with casual attire. All images come with ready-made annotations. **For purchase - contact @concept444.**
+Contents: 200 images with formal attire and 200 with casual attire. All images come with ready-made annotations. **For purchase - contact @psp_enjoyer.**
 
 To launch the project, install all files from the repository and download Python 3.10+, as well as Ultralytics.
 ```bash
