@@ -3,7 +3,7 @@
 **Architecture and Requirements:**
 
 *   The model is built on the YOLOv11 framework.
-*   `app.py` — A Telegram bot with a graphical interface.
+*   `app.py` — A Telegram bot.
 *   `main.py` — A console version.
 
 **License and Usage:**
