@@ -1,110 +1,122 @@
-import telebot
-import os
-import cv2
+from flask import Flask, render_template, request
 from ultralytics import YOLO
+import cv2
+import os
+import uuid
+from PIL import Image, ImageDraw, ImageFont
+import numpy as np
 
-# ===== НАСТРОЙКИ =====
-TOKEN = "ur token"
+app = Flask(__name__)
 
-MODEL_PATH = r"ur path"
+# =========================
+# НАСТРОЙКИ
+# =========================
+
+MODEL_PATH = r"C:\Users\angel\PycharmProjects\SchoolProject\runs\detect\train3\weights\best.pt"
 
 CLASSES = {
     0: "Деловой стиль (formal)",
     1: "Неделовой стиль (nonformal)"
 }
 
-CONF_THRESHOLD = 0.5  # порог уверенности
+CONF_THRESHOLD = 0.5
 
-# ====================
+UPLOAD_FOLDER = "static/uploads"
+RESULT_FOLDER = "static/results"
 
-bot = telebot.TeleBot(TOKEN)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(RESULT_FOLDER, exist_ok=True)
+
 model = YOLO(MODEL_PATH)
 
-os.makedirs("temp", exist_ok=True)
+# шрифт с кириллицей (Windows можно arial.ttf)
+FONT_PATH = "arial.ttf"
 
+# =========================
+# ГЛАВНАЯ СТРАНИЦА
+# =========================
 
-@bot.message_handler(commands=["start"])
-def start(message):
-    bot.send_message(
-        message.chat.id,
-        "👔 *Детектор делового стиля*\n\n"
-        "Отправь фотографию человека, и я скажу:\n"
-        "— деловой это стиль или нет\n\n"
-        "📸 Просто отправь фото",
-        parse_mode="Markdown"
-    )
+@app.route("/", methods=["GET", "POST"])
+def index():
 
+    result_image = None
+    label = None
+    confidence = None
+    error = None
 
-@bot.message_handler(content_types=["photo"])
-def handle_photo(message):
-    try:
-        # --- Скачивание фото ---
-        file_info = bot.get_file(message.photo[-1].file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
+    if request.method == "POST":
 
-        img_path = f"temp/{message.chat.id}.jpg"
-        with open(img_path, "wb") as f:
-            f.write(downloaded_file)
+        file = request.files.get("photo")
 
-        # --- Запуск модели ---
+        if not file or file.filename == "":
+            return render_template("index.html", error="Файл не выбран")
+
+        filename = f"{uuid.uuid4()}.jpg"
+
+        img_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(img_path)
+
         results = model(img_path)[0]
 
         if len(results.boxes) == 0:
-            bot.send_message(
-                message.chat.id,
-                "❌ Человек не обнаружен или стиль определить не удалось"
-            )
-            return
+            return render_template("index.html", error="Человек не найден")
 
-        # --- Берём самый уверенный bbox ---
         best_box = max(results.boxes, key=lambda b: float(b.conf))
+
         cls_id = int(best_box.cls)
         confidence = float(best_box.conf)
 
         if confidence < CONF_THRESHOLD:
-            bot.send_message(
-                message.chat.id,
-                "🤔 Не удалось уверенно определить стиль"
-            )
-            return
+            return render_template("index.html", error="Низкая уверенность модели")
 
         label = CLASSES.get(cls_id, "Неизвестно")
 
-        # --- Рисуем bounding box ---
+        # =========================
+        # РИСОВАНИЕ
+        # =========================
+
         img = cv2.imread(img_path)
+
         x1, y1, x2, y2 = map(int, best_box.xyxy[0])
 
+        # рамка
         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        print(f"{label} ({confidence:.2f})")
-        cv2.putText(
-            img,
-            f"{label} ({confidence:.2f})",
-            (x1, y1 - 10),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (0, 255, 0),
-            2
-        )
 
-        result_path = f"temp/result_{message.chat.id}.jpg"
+        # PIL для текста
+        img_pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        draw = ImageDraw.Draw(img_pil)
+
+        try:
+            font = ImageFont.truetype(FONT_PATH, 20)
+        except:
+            font = ImageFont.load_default()
+
+        text = f"{label} ({confidence:.2f})"
+
+        draw.text((x1, y1 - 25), text, font=font, fill=(0, 255, 0))
+
+        img = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
+
+        # сохранение
+        result_filename = f"result_{filename}"
+        result_path = os.path.join(RESULT_FOLDER, result_filename)
+
         cv2.imwrite(result_path, img)
 
-        # --- Отправка результата ---
-        with open(result_path, "rb") as photo:
-            bot.send_photo(
-                message.chat.id,
-                photo,
-                caption=f"✅ *Результат анализа:*\n"
-                        f"👕 Стиль: *{label}*\n"
-                        f"📊 Уверенность: *{confidence:.2f}*",
-                parse_mode="Markdown"
-            )
+        result_image = result_path.replace("\\", "/")
 
-    except Exception as e:
-        bot.send_message(message.chat.id, "⚠️ Произошла ошибка при обработке изображения")
-        print(e)
+    return render_template(
+        "index.html",
+        result_image=result_image,
+        label=label,
+        confidence=confidence,
+        error=error
+    )
 
 
-print("🤖 Бот запущен")
-bot.polling(none_stop=True)
+# =========================
+# START
+# =========================
 
+if __name__ == "__main__":
+    app.run(debug=True)

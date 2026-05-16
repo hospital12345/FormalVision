@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Style Detector</title>
+
+<style>
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: radial-gradient(circle at top, #1a1a1a, #0a0a0a);
+    color: white;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 100vh;
+}
+
+.container {
+    width: 100%;
+    max-width: 720px;
+    padding: 20px;
+}
+
+.card {
+
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(12px);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    border-radius: 20px;
+
+    padding: 25px;
+
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 5px;
+    font-size: 28px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #aaa;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.upload-box {
+
+    border: 2px dashed rgba(255,255,255,0.2);
+
+    padding: 25px;
+
+    border-radius: 16px;
+
+    text-align: center;
+
+    transition: 0.3s;
+
+    cursor: pointer;
+}
+
+.upload-box:hover {
+    border-color: #00ff88;
+    background: rgba(0,255,136,0.05);
+}
+
+input[type=file] {
+    width: 100%;
+    color: white;
+}
+
+button {
+
+    width: 100%;
+
+    margin-top: 15px;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background: linear-gradient(135deg, #00ff88, #00aa55);
+
+    color: black;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: scale(1.02);
+}
+
+.result {
+
+    margin-top: 20px;
+
+    background: rgba(255,255,255,0.05);
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    padding: 15px;
+
+    border-radius: 16px;
+}
+
+.result p {
+    margin: 6px 0;
+}
+
+img {
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 16px;
+}
+
+.error {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(255,0,0,0.15);
+    border: 1px solid rgba(255,0,0,0.3);
+    border-radius: 12px;
+    color: #ff6b6b;
+}
+
+.author {
+    margin-top: 20px;
+    text-align: center;
+    color: #666;
+    font-size: 12px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+    <h1>👔 AI Style Detector</h1>
+    <div class="subtitle">Определение делового стиля по фото</div>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <div class="upload-box">
+            <input type="file" name="photo" accept="image/*" capture="environment" required>
+        </div>
+
+        <button type="submit">Анализировать</button>
+
+    </form>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    {% if result_image %}
+
+        <div class="result">
+            <p>👕 Стиль: <b>{{ label }}</b></p>
+            <p>📊 Уверенность: <b>{{ "%.2f"|format(confidence) }}</b></p>
+        </div>
+
+        <img src="{{ result_image }}">
+
+    {% endif %}
+
+    <div class="author">
+        Автор: Валишин Денис 9Г
+    </div>
+
+</div>
+
+</div>
+
+</body>
+</html>
