@@ -12,7 +12,7 @@ app = Flask(__name__)
 # НАСТРОЙКИ
 # =========================
 
-MODEL_PATH = r"C:\Users\angel\PycharmProjects\SchoolProject\runs\detect\train3\weights\best.pt"
+MODEL_PATH = r"best.pt"
 
 CLASSES = {
     0: "Деловой стиль (formal)",
